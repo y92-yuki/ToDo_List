@@ -3,3 +3,7 @@ body {
     height: 100vh;
     background-color: aliceblue;
 }
+
+.delete {
+    text-align: right;
+}
