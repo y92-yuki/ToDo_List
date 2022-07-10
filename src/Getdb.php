@@ -41,7 +41,7 @@ class Getdb {
         }
     }
 
-    //時間指定無しのタスクを登録
+    //時間指定有りのタスクを登録
     protected function includeTimeStore($task, $date, $time) {
         try {
             $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task, notification_at) VALUES (3, :task,:date_time)");
@@ -54,7 +54,7 @@ class Getdb {
         }
     }
 
-    //時間指定有りのタスクを登録
+    //時間指定無しのタスクを登録
     protected function notIncludeTimeStore($task) {
         try {
             $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task) VALUES (3, :task)");
@@ -65,10 +65,13 @@ class Getdb {
             $this->log->error($e->getMessage());
         }
     }
-
-    protected function getNewTaskId($date, $time) {
+    /*
+        登録済みのタスクを更新・削除するためのidを取得
+        ※ログイン機能実装時に修正が必要
+    */
+    public function getNewTaskId() {
         try {
-            $stmt = $this->connect->prepare("SELECT id FROM tasks where created_at = {$date} {$time}");
+            $stmt = $this->connect->prepare("SELECT id FROM tasks where user_id = 3 ORDER BY id DESC LIMIT 1");
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -77,7 +80,7 @@ class Getdb {
         }
     }
 
-
+    //タスクの新規登録後にJavaScriptで差し込むためのテンプレート
     protected function newTask($task, $text, $date, $time, $color, $id){
         $new_task = <<<EOD
         <div class="card my-2">
@@ -89,11 +92,12 @@ class Getdb {
             </div>
                 <div class="delete">
                     <button class="btn btn-sm btn-danger delete_open m-1">削除</button>
+                    <button type="button" class="btn btn-sm btn-success update_open m-1">変更</button>
                 </div>
                 <div class="mask d-none"></div>
                 <div class="modal_window d-none">
-                    <h4>$task</h4>
-                    <button type="button" value="{$id}" class="btn btn-danger m-3 delete_execute">削除する</button>
+                    <h4></h4>
+                    <button type="button" value="{$id}" class="btn m-3 execute"></button>
                     <button type="button" class="btn btn-dark close">閉じる</button> 
                 </div>
             </div>
@@ -103,6 +107,7 @@ class Getdb {
         echo $new_task;
     }
 
+    //タスクの新規登録時の時間指定を制御
     public function storeGetNewTask($task, $date, $time) {
         $text = '';
         $color = '';
@@ -119,15 +124,30 @@ class Getdb {
             $text = '時間指定:';
         }
 
-        $id = $this->getNewTaskId($date, $time);
+        $id = $this->getNewTaskId();
 
-        $this->newTask($task, $text, $date, $time, $color, $id);
+        $this->newTask($task, $text, $date, $time, $color, $id['id']);
     }
 
+    //登録済みのタスクを削除
     public function deleteTask($id) {
         try {
             $stmt = $this->connect->prepare("DELETE FROM tasks WHERE id = :id");
             $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            $this->log->error($e->getMessage());
+        }
+    }
+
+    //タスクを更新
+    public function updateTask($id, $update_task, $update_date, $update_time) {
+        try {
+            $stmt = $this->connect->prepare("UPDATE tasks SET task = :update_task,notification_at = :notification_at  WHERE id = :id");
+            $stmt->execute([
+                ':update_task' => $update_task,
+                ':notification_at' => "{$update_date} {$update_time}",
+                ':id' => $id
+            ]);
         } catch (PDOException $e) {
             $this->log->error($e->getMessage());
         }

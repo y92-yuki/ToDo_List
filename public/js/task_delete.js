@@ -16,11 +16,14 @@ window.addEventListener('DOMContentLoaded',() => {
         parent.querySelector('.modal_window').classList.remove('d-none');
         parent.querySelector('.mask').classList.remove('d-none');
 
+        //モーダルウィンドウを閉じるボタン
         close.onclick = () => {
             mask.classList.add('d-none');
             modal_window.classList.add('d-none');
+            execute.classList.remove('btn-danger');
         };
 
+        //削除決定ボタン
         execute.onclick = e => {
             const formData = new FormData();
             formData.append("id",e.currentTarget.value);
@@ -29,7 +32,11 @@ window.addEventListener('DOMContentLoaded',() => {
                 method: 'POST',
                 body: formData
             })
-            .then(() => parent.classList.add('d-none'))
+            .then(() => {
+                console.log(parent.querySelector('.execute').value);
+                parent.classList.add('d-none');
+                execute.classList.remove('btn-danger');
+            })
             .catch(res => console.error(res))
         };
 
