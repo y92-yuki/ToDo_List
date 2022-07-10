@@ -66,8 +66,19 @@ class Getdb {
         }
     }
 
+    protected function getNewTaskId($date, $time) {
+        try {
+            $stmt = $this->connect->prepare("SELECT id FROM tasks where created_at = {$date} {$time}");
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            $this->log->error($e->getMessage());
+            return null;
+        }
+    }
 
-    protected function newTask($task, $text, $date, $time, $color){
+
+    protected function newTask($task, $text, $date, $time, $color, $id){
         $new_task = <<<EOD
         <div class="card my-2">
             <div class="card-body">
@@ -75,8 +86,15 @@ class Getdb {
                 <div class="card-text">
                     {$task}
                 </div>
-                <div class="remove">
-                    <button class="btn btn-sm btn-danger">削除</button>
+            </div>
+                <div class="delete">
+                    <button class="btn btn-sm btn-danger delete_open m-1">削除</button>
+                </div>
+                <div class="mask d-none"></div>
+                <div class="modal_window d-none">
+                    <h4>$task</h4>
+                    <button type="button" value="{$id}" class="btn btn-danger m-3 delete_execute">削除する</button>
+                    <button type="button" class="btn btn-dark close">閉じる</button> 
                 </div>
             </div>
         </div>
@@ -101,7 +119,17 @@ class Getdb {
             $text = '時間指定:';
         }
 
-        $this->newTask($task, $text, $date, $time, $color);
+        $id = $this->getNewTaskId($date, $time);
 
+        $this->newTask($task, $text, $date, $time, $color, $id);
+    }
+
+    public function deleteTask($id) {
+        try {
+            $stmt = $this->connect->prepare("DELETE FROM tasks WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            $this->log->error($e->getMessage());
+        }
     }
 }

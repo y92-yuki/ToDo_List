@@ -49,7 +49,7 @@
                 <h2 class="text-danger">タスクの取得に失敗しました</h1>
             <?php endif ?>
             <?php foreach ($tasks as $task): ?>
-                <div class="card my-2">
+                <div class="card my-2" id="task_num<?= $task['id'] ?>">
                     <div class="card-body">
                         <?php if ($task['notification_at']): ?>
                             <div class="card-title d-none">時間指定:<span class="notification_at"><?= $task['notification_at'] ?></span></div>
@@ -57,9 +57,15 @@
                         <div class="card-text">
                             <?= $task['task'] ?>
                         </div>
-                        <div class="delete">
-                            <button class="btn btn-sm btn-danger">削除</button>
-                        </div>
+                    </div>
+                    <div class="delete">
+                        <button type="button" class="btn btn-sm btn-danger delete_open m-1">削除</button>
+                    </div>
+                    <div class="mask d-none"></div>
+                    <div class="modal_window d-none">
+                        <h4><?= $task['task'] ?></h4>
+                        <button type="button" value="<?= $task['id'] ?>" class="btn m-3 execute"></button>
+                        <button type="button" class="btn btn-dark close">閉じる</button> 
                     </div>
                 </div>
             <?php endforeach ?>
@@ -69,5 +75,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="../css/bootstrap-5.0.2-dist/js/bootstrap.min.js"></script>
     <script src="js/task_register.js"></script>
+    <script src="js/task_delete.js"></script>
 </body>
 </html>
