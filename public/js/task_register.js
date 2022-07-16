@@ -19,11 +19,6 @@ window.addEventListener('DOMContentLoaded',() => {
     //現在時刻から1時間後が初期値
     now_date.setHours(now_date.getHours() + 1);
 
-    // 現在時刻が18時以降の場合は翌日が初期値
-    // if (now_date.getHours() > 17 && now_date.getHours() < 23) {
-    //     now_date.setDate(now_date.getDate() + 1);
-    // }
-
     const year = now_date.getFullYear();
     const month = String(now_date.getMonth() + 1).padStart(2,'0');
     const date = String(now_date.getDate()).padStart(2,'0');

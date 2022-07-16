@@ -37,16 +37,18 @@
                     <input type="date" name="date" value="">
                     <input type="time" name="time" value="">
                 </div>
+                <!-- ログイン中のユーザーID(仮) -->
+                <input type="hidden" name="user_id" value="3">
                 <!-- 
                     CSRF対策用。後で実装する
                     <input type="hidden" name="token" value="">
                 -->
-                <button type="submit" class="btn btn-primary my-3">登録</button>
+                <button type="submit" class="btn btn-primary my-3" value="">登録</button>
             </form>
         </div>
         <div class="task_list">
             <?php if (is_null($tasks)): ?>
-                <h2 class="text-danger">タスクの取得に失敗しました</h1>
+                <h2 class="text-danger">タスクの取得に失敗しました</h2>
             <?php endif ?>
             <?php foreach ($tasks as $task): ?>
                 <div class="card my-2" id="task_num<?= $task['id'] ?>">

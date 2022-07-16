@@ -9,9 +9,11 @@ window.addEventListener('DOMContentLoaded',() => {
         const mask = parent.querySelector('.mask');
         const modal_window = parent.querySelector('.modal_window');
         const execute = parent.querySelector('.execute');
+        const initial_task = parent.querySelector('.card-text');
 
         execute.textContent = '削除する';
         execute.classList.add('btn-danger');
+        parent.querySelector('h4').textContent = initial_task.textContent;
 
         parent.querySelector('.modal_window').classList.remove('d-none');
         parent.querySelector('.mask').classList.remove('d-none');
@@ -21,6 +23,7 @@ window.addEventListener('DOMContentLoaded',() => {
             mask.classList.add('d-none');
             modal_window.classList.add('d-none');
             execute.classList.remove('btn-danger');
+            parent.querySelector('h4').textContent = '';
         };
 
         //削除決定ボタン
@@ -33,7 +36,6 @@ window.addEventListener('DOMContentLoaded',() => {
                 body: formData
             })
             .then(() => {
-                console.log(parent.querySelector('.execute').value);
                 parent.classList.add('d-none');
                 execute.classList.remove('btn-danger');
             })

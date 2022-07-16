@@ -14,6 +14,7 @@ window.addEventListener('DOMContentLoaded',() => {
             input_update_task.remove();
             input_update_date.remove();
             input_update_time.remove();
+            parent.querySelector('h4').textContent = '';
             if (validate_message) {
                 validate_message.remove();
             }
@@ -66,7 +67,7 @@ window.addEventListener('DOMContentLoaded',() => {
         //モーダルウィンドウのボタンを更新ボタンへ変更
         execute.textContent = '更新する';
         execute.classList.add('btn-success');
-        document.querySelector('h4').textContent = initial_task.textContent;
+        parent.querySelector('h4').textContent = initial_task.textContent;
 
         parent.querySelector('.modal_window').classList.remove('d-none');
         parent.querySelector('.mask').classList.remove('d-none');
@@ -99,14 +100,17 @@ window.addEventListener('DOMContentLoaded',() => {
                 })
                 .then(res => res.json())
                 .then(res => {
-                    console.log(input_update_date.value);
-                    console.log(input_update_time.value);
-
+                    console.log(res);
                     modal_remove();
-                    initial_task.textContent = res['task'];
-                    parent.querySelector('.notification_at').textContent = `${input_update_date.value} ${input_update_time.value}`;
-
-                    if (new Date(`${input_update_date.value}  ${input_update_time.value}`).getTime() <= Date.now()) {
+                    initial_task.textContent = res.update_task;
+                    const notification_at = parent.querySelector('.notification_at');
+                    
+                    if (res.update_date) {
+                        notification_at.textContent = `${res.update_date} ${res.update_time}`;
+                        card_title.classList.remove('d-none');
+                    }
+                    
+                    if (new Date(`${res.update_date}  ${res.update_time}`).getTime() <= Date.now()) {
                         card_title.classList.add('text-danger');
                     } else {
                         card_title.classList.remove('text-danger');

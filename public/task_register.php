@@ -7,4 +7,5 @@ use Src\Getdb;
 $pdo = new Getdb();
 
 //タスクを新規登録してtask_register.jsに返す
-$pdo->storeGetNewTask($_POST['task'], $_POST['date'], $_POST['time']);
+$pdo->storeGetNewTask($_POST['user_id'], $_POST['task'], $_POST['date'], $_POST['time']);
+

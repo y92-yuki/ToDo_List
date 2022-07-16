@@ -42,10 +42,11 @@ class Getdb {
     }
 
     //時間指定有りのタスクを登録
-    protected function includeTimeStore($task, $date, $time) {
+    protected function includeTimeStore($user_id, $task, $date, $time) {
         try {
-            $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task, notification_at) VALUES (3, :task,:date_time)");
+            $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task, notification_at) VALUES (:user_id, :task,:date_time)");
             $stmt->execute([
+                ':user_id' => $user_id,
                 ':task' => $task,
                 ':date_time' => "{$date} {$time}",
             ]);
@@ -55,10 +56,11 @@ class Getdb {
     }
 
     //時間指定無しのタスクを登録
-    protected function notIncludeTimeStore($task) {
+    protected function notIncludeTimeStore($user_id, $task) {
         try {
-            $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task) VALUES (3, :task)");
+            $stmt = $this->connect->prepare("INSERT INTO tasks (user_id, task) VALUES (:user_id, :task)");
             $stmt->execute([
+                ':user_id' => $user_id,
                 ':task' => $task,
             ]);
         } catch (PDOException $e) {
@@ -69,10 +71,10 @@ class Getdb {
         登録済みのタスクを更新・削除するためのidを取得
         ※ログイン機能実装時に修正が必要
     */
-    public function getNewTaskId() {
+    public function getNewTaskId($user_id) {
         try {
-            $stmt = $this->connect->prepare("SELECT id FROM tasks where user_id = 3 ORDER BY id DESC LIMIT 1");
-            $stmt->execute();
+            $stmt = $this->connect->prepare("SELECT id FROM tasks where user_id = :user_id ORDER BY id DESC LIMIT 1");
+            $stmt->execute([':user_id' => $user_id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $this->log->error($e->getMessage());
@@ -107,24 +109,24 @@ class Getdb {
         echo $new_task;
     }
 
-    //タスクの新規登録時の時間指定を制御
-    public function storeGetNewTask($task, $date, $time) {
+    //タスクを新規登録して指定時間に応じて色を変える
+    public function storeGetNewTask($user_id, $task, $date, $time) {
         $text = '';
         $color = '';
 
         $cb = new Carbon($date . $time);
 
         if (empty($date)) {
-            $this->notIncludeTimeStore($task);
+            $this->notIncludeTimeStore($user_id, $task);
         } else {
             if ($cb->isPast()) {
                 $color = 'text-danger';
             }
-            $this->includeTimeStore($task, $date, $time);
+            $this->includeTimeStore($user_id, $task, $date, $time);
             $text = '時間指定:';
         }
 
-        $id = $this->getNewTaskId();
+        $id = $this->getNewTaskId($user_id);
 
         $this->newTask($task, $text, $date, $time, $color, $id['id']);
     }
@@ -141,12 +143,34 @@ class Getdb {
 
     //タスクを更新
     public function updateTask($id, $update_task, $update_date, $update_time) {
+        if (empty($update_date)) {
+            $this->notIncludeTimeUpdate($id, $update_task);
+        } else {
+            $this->includeTimeUpdate($id, $update_task, $update_date, $update_time);
+        }
+    }
+
+    //時間指定ありのタスク更新
+    protected function includeTimeUpdate($id, $update_task, $update_date, $update_time) {
         try {
             $stmt = $this->connect->prepare("UPDATE tasks SET task = :update_task,notification_at = :notification_at  WHERE id = :id");
             $stmt->execute([
                 ':update_task' => $update_task,
                 ':notification_at' => "{$update_date} {$update_time}",
                 ':id' => $id
+            ]);
+        } catch (PDOException $e) {
+            $this->log->error($e->getMessage());
+        }
+    }
+
+    //時間指定無しのタスク更新
+    protected function notIncludeTimeUpdate($id, $update_task) {
+        try {
+            $stmt = $this->connect->prepare("UPDATE tasks SET task = :update_task WHERE id = :id");
+            $stmt->execute([
+                ':update_task' => $update_task,
+                ':id' => $id,
             ]);
         } catch (PDOException $e) {
             $this->log->error($e->getMessage());
