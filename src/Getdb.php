@@ -52,6 +52,7 @@ class Getdb {
             ]);
         } catch (PDOException $e) {
             $this->log->error($e->getMessage());
+            return 'error';
         }
     }
 
@@ -65,6 +66,7 @@ class Getdb {
             ]);
         } catch (PDOException $e) {
             $this->log->error($e->getMessage());
+            return 'error';
         }
     }
     /*
@@ -106,7 +108,7 @@ class Getdb {
         </div>
         EOD;
 
-        echo $new_task;
+        return $new_task;
     }
 
     //タスクを新規登録して指定時間に応じて色を変える
@@ -117,18 +119,23 @@ class Getdb {
         $cb = new Carbon($date . $time);
 
         if (empty($date)) {
-            $this->notIncludeTimeStore($user_id, $task);
+            $register_result = $this->notIncludeTimeStore($user_id, $task);
         } else {
             if ($cb->isPast()) {
                 $color = 'text-danger';
             }
-            $this->includeTimeStore($user_id, $task, $date, $time);
+            $register_result = $this->includeTimeStore($user_id, $task, $date, $time);
             $text = '時間指定:';
+        }
+
+        //タスク登録時に例外が発生するとnullが返り値
+        if ($register_result === 'error') {
+            return null;
         }
 
         $id = $this->getNewTaskId($user_id);
 
-        $this->newTask($task, $text, $date, $time, $color, $id['id']);
+        return $this->newTask($task, $text, $date, $time, $color, $id['id']);
     }
 
     //登録済みのタスクを削除

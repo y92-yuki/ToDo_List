@@ -6,9 +6,7 @@
 
     $pdo = new Getdb();
 
-    /*
-        登録済みのタスクを取得する。(エラーがあればNULLが返り値)
-    */
+    // 登録済みのタスクを取得する。(エラーがあればNULLが返り値)
     $tasks = $pdo->getTasks();
 ?>
 
@@ -25,9 +23,9 @@
         <div class="register_area">
             <form action="#" method="POST" id="task_form" class="mt-10">
                 <div class="form-group d-inline-block col-md-6">
-                    <p class="h3">タスク</p>
+                    <label for="task" class="h3">タスク</label>
                     <p class="validate_message d-none text-danger">予定を入力してください</p>
-                    <input type="text" name="task" class="form-control">
+                    <input type="text" name="task" id="task" class="form-control">
                 </div>
                 <div class="form-group mt-3">
                     <p class="h3 d-inline">時間通知を有効</p>
@@ -72,7 +70,6 @@
             <?php endforeach ?>
         </div>
     </div>
-
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="../css/bootstrap-5.0.2-dist/js/bootstrap.min.js"></script>
     <script src="js/task_register.js"></script>

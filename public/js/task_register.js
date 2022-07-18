@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded',() => {
     const now_date = new Date();
     const notification_at = document.querySelectorAll('.notification_at');
 
-    //指定している通知時間を表示して、通知する時間のものは赤文字にする
+    //指定している通知時間を表示して、現在時刻以降のものは赤文字にする
     for (let p of notification_at) {
         if (now_date.getTime() >= Date.parse(p.textContent)) {
             p.parentNode.classList.remove('d-none');
@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded',() => {
     const date = String(now_date.getDate()).padStart(2,'0');
     const hour = String(now_date.getHours()).padStart(2,'0');
 
-    //時間通知 有効・無効のチェックボックス
+    //時間通知の有効・無効のチェックボックス
     const apply_time_notification = document.querySelector('#apply_time_notification');
 
     //日付・時間のdiv要素
@@ -36,9 +36,8 @@ window.addEventListener('DOMContentLoaded',() => {
     //時間
     const input_time = document.querySelector('input[name=time]');
 
-    //通知時間のチェックボックスイベント
-    apply_time_notification.onchange = () => {
-        
+    //「通知時間を有効」にチェックを入れると時刻と空白を入れ替える
+    apply_time_notification.addEventListener('change',() => {
         if (input_date.value && input_time.value) {
             input_date.value = "";
             input_time.value = "";
@@ -46,14 +45,13 @@ window.addEventListener('DOMContentLoaded',() => {
             input_date.value = `${year}-${month}-${date}`;
             input_time.value = `${hour}:00`;
         }
-
         time_noticication.classList.toggle('d-none');
-    }
+    });
 
     //タスクの入力フォームを取得
     const task_form = document.querySelector('#task_form');
 
-    task_form.onsubmit = e => {
+    task_form.addEventListener('submit', e => {
         e.preventDefault();
         const formData = new FormData(task_form);
         const task = document.querySelector('input[name=task]');
@@ -69,7 +67,12 @@ window.addEventListener('DOMContentLoaded',() => {
                 body: formData
             })
             .then(res => res.text())
-            .then(res => document.querySelector('.task_list').insertAdjacentHTML('beforeend',res))
+            .then(res => {
+                if (res === '') {
+                    return Promise.reject('error is task_register.php');
+                }
+                document.querySelector('.task_list').insertAdjacentHTML('beforeend',res);
+            })
             .then(() => {
                 task.classList.remove('is-invalid');
                 validate_message.classList.add('d-none');
@@ -83,5 +86,5 @@ window.addEventListener('DOMContentLoaded',() => {
                 console.error(e);
             })
         }
-    }
+    })
 });
